@@ -1,4 +1,5 @@
 5 SQL Reports:
+
 1. The report displays the batches which need to be finished and shipped as soon as possible. As the report includes the raw materials’, the batches’, and the employees’ information, the management team of the brewery can monitor if the suppliers delivered the raw materials on time and know which employees should follow up and report the status of the process.
   
 SELECT r.supplier_id, r.raw_material_id,p.batch_id, p.product_line, p.best_buy_date,e.employee_id,
@@ -34,7 +35,6 @@ on o.order_id=p.order_id
 group by c.customer_state
 order by 3
 ;
-
 
 
 4. Generates an invoice for order displaying Customer full name, what was ordered, the cost of the order, and adjusted price for rush orders or discounts for paying in full. Sorted by the most recent order. It is beneficial to be able to include relevant information about transactions to customers. 
