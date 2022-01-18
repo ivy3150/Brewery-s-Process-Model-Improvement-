@@ -1,0 +1,58 @@
+5 SQL Reports:
+1. The report displays the batches which need to be finished and shipped as soon as possible. As the report includes the raw materials’, the batches’, and the employees’ information, the management team of the brewery can monitor if the suppliers delivered the raw materials on time and know which employees should follow up and report the status of the process.
+  
+SELECT r.supplier_id, r.raw_material_id,p.batch_id, p.product_line, p.best_buy_date,e.employee_id,
+e.employee_last_name||', '||e.employee_first_name "Employee's Name"
+FROM aez20001.raw_materials r join aez20001.product_line p
+on r.batch_id = p.batch_id
+join aez20001.employee e on e.batch_id = p.batch_id
+where best_buy_date<'01-JUL-21'
+ORDER BY best_buy_date;
+
+
+2. The report shows which products have a problem of high inventory. The inventory of the two IPA’s products is higher than the one of the ale’s product. The brewery can use the report to monitor whether customers will have demand to reduce the excess inventory. If the problem has not been solved, the brewery should improve forecast accuracy to reduce storage costs and waste.
+
+select p.product_id, p.batch_id, p.type_of_beer, p.quanity, l.product_line
+from aez20001.products p join aez20001.product_line l
+on p.batch_id=l.batch_id
+where p.quanity >=ALL
+        (
+        select quanity 
+        from aez20001.products
+        where type_of_beer='ALE'
+        )
+       ;
+
+
+3. This report displays customer state, sum of order costs, and sum of the amount that was ordered. Grouped by state dn ordered by the sum of the orders. This Gives insight into where we are shipping our product and what states are generating the most money in sales. This could be used to identify states that should be targeted for upselling or where to focus promotions and advertising. 
+
+select c.customer_state as "State",sum(p.order_cost) as "Sales",sum(product_quantity) as "Sales Volume"
+from customer c join order_1 o
+on c.customer_id=o.customer_id
+join product_order p
+on o.order_id=p.order_id
+group by c.customer_state
+order by 3
+;
+
+
+
+4. Generates an invoice for order displaying Customer full name, what was ordered, the cost of the order, and adjusted price for rush orders or discounts for paying in full. Sorted by the most recent order. It is beneficial to be able to include relevant information about transactions to customers. 
+
+select concat(concat(customer_first_name,' '),customer_last_name)"Customer_Name",ps.type_of_beer,ps.quanity, p.order_cost, o.order_date,
+nvl((case when o.order_comments='Need ASP' then p.order_cost+(p.order_cost*.2)
+    when o.order_comments='Paid in full' then p.order_cost-(p.order_cost*.1)
+    end),0) "Price Adjustment"   
+from customer c join order_1 o
+on c.customer_id=o.customer_id
+join product_order p
+on o.order_id=p.order_id
+join products ps
+on ps.product_id=p.product_id
+order by o.order_date desc ;
+
+
+5. Generated a report giving a view on maximum and minimum order cost in different product categories available with the brewery. The report will supplement the firm’s effort to formulate a good pricing strategy based upon the sales trends from the past months. The pricing strategy will be based on these maximum and minimum price points. 
+
+SQL code: Select p.type_of_beer, max(o.order_cost) maximum_order_cost, min(o.order_cost) minimum_order_cost from aez20001.product_order o inner join aez20001.products p on o.product_id = p.product_id where o.order_cost is not null group by p.type_of_beer;
+
